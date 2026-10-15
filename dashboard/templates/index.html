@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panoramic OPG Hybrid Analyzer</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        background: #f4f7fa;
+        color: #17202a;
+    }
+
+    .container {
+        max-width: 1450px;
+        margin: 10px auto 12px;
+        padding: 0 14px;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 11px 14px;
+        margin-bottom: 8px;
+        box-shadow: 0 3px 14px rgba(0,0,0,.07);
+    }
+
+    h1 {
+        margin: 0 0 3px;
+        font-size: 22px;
+    }
+
+    h2 {
+        margin: 0 0 16px;
+        font-size: 20px;
+    }
+
+    .subtitle {
+        color: #5f6b76;
+        margin-bottom: 7px;
+    }
+
+    button {
+        border: 0;
+        border-radius: 7px;
+        padding: 10px 19px;
+        background: #1769e0;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #error {
+        color: #b42318;
+        font-weight: 600;
+    }
+
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .image-panel {
+        background: #f8fafc;
+        border: 1px solid #e3e8ee;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .image-panel h3 {
+        margin: 0;
+        padding: 10px 14px;
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+        background: #f1f4f7;
+    }
+
+    .image-panel img {
+        width: 100%;
+        height: 225px;
+        object-fit: contain;
+        display: block;
+        background: #111;
+    }
+
+    .insight-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        box-shadow: 0 3px 14px rgba(0,0,0,.07);
+    }
+
+    .insight-card h2 {
+        margin: 0 0 5px;
+        font-size: 16px;
+    }
+
+    .insight-line {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .restorative-heading {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .restorative-heading-note {
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.3;
+        font-weight: 500;
+    }
+
+
+    .insight-secondary {
+        color: #667085;
+        font-size: 11px;
+        font-weight: 500;
+        margin-left: 8px;
+    }
+
+    .compact-radiopacity {
+        margin-top: 8px;
+        padding: 10px 2px 3px;
+        border-top: 1px solid #d9dee5;
+        font-size: 14px;
+        line-height: 1.45;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .compact-radiopacity .disclaimer-inline {
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 500;
+        margin-left: 10px;
+    }
+
+    .fdi-metrics {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .fdi-metrics strong {
+        font-size: 15px;
+        color: #17202a;
+        margin-left: 3px;
+    }
+
+    .regional-footer {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-top: 2px;
+        padding-top: 6px;
+        border-top: 1px solid #e5e7eb;
+        font-size: 13px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .tooth-chart-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 3px;
+        flex-wrap: wrap;
+    }
+
+    .tooth-chart-header h2 {
+        margin: 0;
+    }
+
+    .inline-tooth-metric {
+        font-size: 14px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .inline-tooth-metric strong {
+        font-size: 18px;
+        color: #17202a;
+        margin-left: 4px;
+    }
+
+    .not-detected-metric {
+        color: #344054;
+        font-weight: 700;
+    }
+
+    .not-detected-metric strong {
+        color: #c62828 !important;
+        font-weight: 800;
+    }
+
+    .present-metric strong {
+        color: #14854f !important;
+        font-weight: 800;
+    }
+
+    .metric-divider {
+        color: #98a2b3;
+        font-weight: 600;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .metric {
+        padding: 14px 16px;
+        border-radius: 10px;
+        background: #f6f8fa;
+    }
+
+    .metric strong {
+        display: block;
+        font-size: 23px;
+        margin-top: 4px;
+    }
+
+    .tooth-chart {
+        padding: 8px 4px 0;
+        overflow-x: auto;
+    }
+
+    .arch-label {
+        color: #667085;
+        font-size: 13px;
+        font-weight: 800;
+        margin: 2px 0 4px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .tooth-row {
+        min-width: 920px;
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        gap: 3px;
+        margin-bottom: 8px;
+        position: relative;
+    }
+
+    /* Anatomical midline: separates patient right and left FDI quadrants. */
+    .tooth-row::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background: #c7cdd4;
+        pointer-events: none;
+    }
+
+    .tooth-slot {
+        text-align: center;
+    }
+
+    .tooth-icon {
+        width: 38px;
+        height: 48px;
+        margin: auto;
+        position: relative;
+    }
+
+    .tooth-svg {
+        width: 38px;
+        height: 48px;
+        display: block;
+    }
+
+    .tooth-shape {
+        fill: #f7fbff;
+        stroke: #2878c7;
+        stroke-width: 2;
+    }
+
+    .tooth-slot.missing .tooth-shape {
+        fill: #e2e5e9;
+        stroke: #aeb4ba;
+    }
+
+    .tooth-number {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 15px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: #195da4;
+        pointer-events: none;
+    }
+
+    .tooth-slot.missing .tooth-number {
+        color: #8c939a;
+    }
+
+    .tooth-name {
+        font-size: 10px;
+        line-height: 1.05;
+        margin-top: 1px;
+        min-height: 20px;
+        color: #344054;
+        font-weight: 700;
+    }
+
+    .tooth-state {
+        font-size: 10px;
+        line-height: 1;
+        margin-top: 1px;
+        color: #398458;
+        font-weight: 700;
+    }
+
+    .tooth-slot.missing .tooth-state {
+        color: #c62828;
+        font-weight: 800;
+    }
+
+    .wisdom-grid,
+    .quadrant-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .small-card {
+        border-radius: 9px;
+        background: #f6f8fa;
+        padding: 9px 10px;
+        text-align: center;
+    }
+
+    .small-card strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 17px;
+    }
+
+    .status-yes {
+        color: #087a43;
+        font-weight: 700;
+    }
+
+    .status-no {
+        color: #667085;
+        font-weight: 700;
+    }
+
+    .clinical-note,
+    .disclaimer {
+        color: #5f6b76;
+        line-height: 1.55;
+    }
+
+    @media (max-width: 1000px) {
+        .image-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .image-panel img {
+            height: auto;
+            max-height: 450px;
+        }
+    }
+
+/* ===== Clinical colour accents ===== */
+
+.hero-title {
+    color: #163b65;
+}
+
+.hero-subtitle {
+    color: #2878a8;
+    font-weight: 700;
+}
+
+.hero-disclaimer {
+    color: #667085;
+}
+
+/* Insight headings */
+.insight-card h2 {
+    color: #163b65;
+}
+
+/* FDI regional metrics */
+.q1-value { color: #1976d2; font-weight: 800; }
+.q2-value { color: #00897b; font-weight: 800; }
+.q3-value { color: #7b61a8; font-weight: 800; }
+.q4-value { color: #d97706; font-weight: 800; }
+
+.lr-value {
+    color: #b45309;
+    font-weight: 800;
+}
+
+.ul-value {
+    color: #7c3aed;
+    font-weight: 800;
+}
+
+/* Restorative section */
+.restorative-heading {
+    color: #163b65 !important;
+}
+
+.restorative-heading-note {
+    color: #667085 !important;
+}
+
+#radiopacityInterpretation {
+
+    font-weight: 800;
+}
+
+
+/* ===== Final clinical colour accents ===== */
+
+/* Main header */
+h1 {
+    color: #174a7e !important;
+}
+
+/* Header subtitle */
+.header p b {
+    color: #1976a8 !important;
+}
+
+/* Insight headings */
+.insight-card h2 {
+    color: #174a7e !important;
+}
+
+/* FDI regional values */
+#q1 {
+    color: #1976d2 !important;
+    font-weight: 800;
+}
+
+#q2 {
+    color: #00897b !important;
+    font-weight: 800;
+}
+
+#q3 {
+    color: #7e57c2 !important;
+    font-weight: 800;
+}
+
+#q4 {
+    color: #e67e22 !important;
+    font-weight: 800;
+}
+
+/* Bilateral differences */
+#leftRightDifference,
+#leftRightDiff {
+    color: #d97706 !important;
+    font-weight: 800;
+}
+
+#upperLowerDifference,
+#upperLowerDiff {
+    color: #8e44ad !important;
+    font-weight: 800;
+}
+
+/* Restorative output - JS assigns final semantic colour */
+#radiopacityInterpretation {
+    font-weight: 800 !important;
+}
+
+
+/* ===== Refined clinical header palette ===== */
+
+h1 {
+    color: #0B4F84 !important;
+    font-weight: 800;
+}
+
+.header p b {
+    color: #087F8C !important;
+    font-weight: 750;
+}
+
+.header p {
+    color: #52697A !important;
+}
+
+
+#radiopacityInterpretation {
+    font-weight: 800 !important;
+}
+
+#radiopacityInterpretation.restorative-found {
+    color: #c62828 !important;
+}
+
+#radiopacityInterpretation.restorative-clear {
+    color: #14854f !important;
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="card">
+        <h1>Panoramic OPG Hybrid Analyzer</h1>
+        <div class="subtitle">
+            <b>AI-assisted panoramic radiograph screening and structural analysis</b><br>
+            <span style="font-size:13px;">
+                Panoramic radiographs are intended for screening-level analysis.
+                AI-derived findings should be interpreted in conjunction with
+                clinical examination and appropriate diagnostic imaging.
+            </span>
+        </div>
+
+        <input id="imageInput" type="file" accept=".png,.jpg,.jpeg">
+        <button onclick="analyze()">Analyze OPG</button>
+
+        <span id="loading" class="hidden"> Processing...</span>
+        <p id="error" class="hidden"></p>
+    </div>
+
+
+    <div id="results" class="hidden">
+
+        <div class="card">
+
+            <div class="image-grid">
+
+                <div class="image-panel">
+                    <h3>Original Panoramic OPG</h3>
+                    <img id="originalImage">
+                </div>
+
+                <div class="image-panel">
+                    <h3>AI Analysis Overlay</h3>
+                    <img id="analysisOverlayImage">
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="tooth-chart-header">
+                <h2>Tooth Chart (FDI-based Regional Tooth Distribution)</h2>
+
+                <div class="fdi-metrics">
+                    <span class="present-metric">
+                        Present:
+                        <strong id="presentCount">-</strong>
+                    </span>
+
+                    <span class="metric-divider">|</span>
+
+                    <span class="not-detected-metric">
+                        Not detected:
+                        <strong id="missingCount">-</strong>
+                    </span>
+                </div>
+            </div>
+<div class="tooth-chart">
+                <div class="arch-label">Maxillary</div>
+                <div id="upperTeeth" class="tooth-row"></div>
+
+                <div class="arch-label">Mandibular</div>
+                <div id="lowerTeeth" class="tooth-row"></div>
+            </div>
+        </div>
+
+        <div class="insight-card">
+            <h2>Bilateral Tooth-Distribution Insight</h2>
+
+            <p class="insight-line">
+                Q1: <strong id="q1">-</strong>
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+                Q2: <strong id="q2">-</strong>
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+                Q3: <strong id="q3">-</strong>
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+                Q4: <strong id="q4">-</strong>
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+                Right–left:
+                <strong><span id="lrDiff"></span>%</strong>
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+                Upper–lower:
+                <strong><span id="ulDiff"></span>%</strong>
+            </p>
+        </div>
+
+        <div class="insight-card">
+            <h2 class="restorative-heading">
+                Radiopaque Restorative-Material Insight
+                <span class="restorative-heading-note">
+                    (<span id="radiopacityDisclaimer"></span>)
+                </span>
+            </h2>
+
+            <p class="insight-line">
+                <strong id="radiopacityInterpretation"></strong>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+const upperOrder = [
+    "18","17","16","15","14","13","12","11",
+    "21","22","23","24","25","26","27","28"
+];
+
+const lowerOrder = [
+    "48","47","46","45","44","43","42","41",
+    "31","32","33","34","35","36","37","38"
+];
+
+function toothSVG() {
+    return `
+        <svg class="tooth-svg" viewBox="0 0 60 75" aria-hidden="true">
+            <path class="tooth-shape"
+                d="M15 7
+                   C8 11 7 20 9 29
+                   C11 38 16 44 18 55
+                   C20 66 23 70 27 61
+                   L30 50
+                   L33 61
+                   C37 70 40 66 42 55
+                   C44 44 49 38 51 29
+                   C53 20 52 11 45 7
+                   C40 3 35 7 30 8
+                   C25 7 20 3 15 7 Z"/>
+        </svg>
+    `;
+}
+
+const toothNames = {
+    "18":"3rd Molar",       "17":"2nd Molar",
+    "16":"1st Molar",       "15":"2nd Premolar",
+    "14":"1st Premolar",    "13":"Canine",
+    "12":"Lateral Incisor", "11":"Central Incisor",
+
+    "21":"Central Incisor", "22":"Lateral Incisor",
+    "23":"Canine",          "24":"1st Premolar",
+    "25":"2nd Premolar",    "26":"1st Molar",
+    "27":"2nd Molar",       "28":"3rd Molar",
+
+    "48":"3rd Molar",       "47":"2nd Molar",
+    "46":"1st Molar",       "45":"2nd Premolar",
+    "44":"1st Premolar",    "43":"Canine",
+    "42":"Lateral Incisor", "41":"Central Incisor",
+
+    "31":"Central Incisor", "32":"Lateral Incisor",
+    "33":"Canine",          "34":"1st Premolar",
+    "35":"2nd Premolar",    "36":"1st Molar",
+    "37":"2nd Molar",       "38":"3rd Molar"
+};
+
+function renderTeeth(containerId, teeth, presentSet) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    teeth.forEach(fdi => {
+        const present = presentSet.has(fdi);
+
+        const slot = document.createElement("div");
+        slot.className = "tooth-slot" + (present ? "" : " missing");
+
+        slot.innerHTML = `
+            <div class="tooth-icon">
+                ${toothSVG()}
+                <div class="tooth-number">${fdi}</div>
+            </div>
+            <div class="tooth-name">
+                ${toothNames[fdi] || ""}
+            </div>
+            <div class="tooth-state">
+                ${present ? "Present" : "Not detected"}
+            </div>
+        `;
+
+        container.appendChild(slot);
+    });
+}
+
+
+async function analyze() {
+
+    const input = document.getElementById("imageInput");
+    const loading = document.getElementById("loading");
+    const error = document.getElementById("error");
+    const results = document.getElementById("results");
+
+    error.classList.add("hidden");
+    results.classList.add("hidden");
+
+    if (!input.files.length) {
+        error.textContent = "Please select an OPG image.";
+        error.classList.remove("hidden");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", input.files[0]);
+
+    loading.classList.remove("hidden");
+
+    try {
+        const response = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Analysis failed.");
+        }
+
+        const stamp = "?t=" + Date.now();
+
+        document.getElementById("originalImage").src =
+            data.images.original + stamp;
+
+        document.getElementById("analysisOverlayImage").src =
+            data.images.analysis_overlay + stamp;
+
+
+        document.getElementById("presentCount").textContent =
+            data.tooth_analysis.present_count;
+
+        document.getElementById("missingCount").textContent =
+            data.tooth_analysis.not_detected_count;
+
+        const presentSet = new Set(
+            data.tooth_analysis.present_fdi.map(String)
+        );
+
+        renderTeeth("upperTeeth", upperOrder, presentSet);
+        renderTeeth("lowerTeeth", lowerOrder, presentSet);
+
+
+        const sf = data.structural_analysis.features;
+
+        document.getElementById("q1").textContent =
+            sf.q1.toFixed(1) + "%";
+
+        document.getElementById("q2").textContent =
+            sf.q2.toFixed(1) + "%";
+
+        document.getElementById("q3").textContent =
+            sf.q3.toFixed(1) + "%";
+
+        document.getElementById("q4").textContent =
+            sf.q4.toFixed(1) + "%";
+
+        document.getElementById("lrDiff").textContent =
+            sf.left_right_diff.toFixed(1);
+
+        document.getElementById("ulDiff").textContent =
+            sf.upper_lower_diff.toFixed(1);
+const radiopacityEl = document.getElementById("radiopacityInterpretation");
+radiopacityEl.textContent = data.radiopacity.interpretation;
+
+radiopacityEl.classList.remove("restorative-found", "restorative-clear");
+
+if (data.radiopacity.candidate_detected === true) {
+    radiopacityEl.classList.add("restorative-found");
+} else if (data.radiopacity.candidate_detected === false) {
+    radiopacityEl.classList.add("restorative-clear");
+} else {
+    const t = data.radiopacity.interpretation.toLowerCase();
+    radiopacityEl.classList.add(
+        t.startsWith("no ") ? "restorative-clear" : "restorative-found"
+    );
+}
+
+        document.getElementById("radiopacityDisclaimer").textContent =
+            data.radiopacity.disclaimer;
+
+        results.classList.remove("hidden");
+
+    } catch (err) {
+        error.textContent = err.message;
+        error.classList.remove("hidden");
+
+    } finally {
+        loading.classList.add("hidden");
+    }
+}
+</script>
+
+</body>
+</html>

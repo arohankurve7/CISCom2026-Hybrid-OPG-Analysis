@@ -1,0 +1,64 @@
+# Python environment and cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# IDE and macOS
+.idea/
+.DS_Store
+
+# Research datasets and medical images
+datasets/
+TEST/
+TEST_RESTORATION/
+dashboard/uploads/
+dashboard/generated/
+
+# Model weights
+models/
+*.pt
+*.pth
+*.h5
+*.keras
+*.onnx
+
+# Generated outputs and experimental artifacts
+outputs/
+results/
+evaluation/restoration_negative_review/
+evaluation/restoration_gt_batches/
+evaluation/restoration_val_batches/
+evaluation/restoration_val_negative_review/
+evaluation/radiopacity_adaptive_180/
+evaluation/radiopacity_overlays/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.log
+
+# Temporary source and UI backups
+*.bak
+dashboard_backup_before_final/
+
+# Dataset provenance - review before publishing
+TEST_DATASET_ORIGIN.csv
+
+# Generated evaluation tables and image contact sheets
+evaluation/*.csv
+evaluation/*.jpg
+
+# Legacy reference implementations - retain locally
+fdi/_final_fdi_inference_reference.py
+evaluation/_evaluate_presence_reference.py
+evaluation/_evaluate_resolved_fdi_reference.py
+
+# Empty placeholder pipeline
+pipeline/opg_pipeline.py
+
+# Empty placeholder documentation
+configs/README.md
