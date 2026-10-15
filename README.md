@@ -168,7 +168,6 @@ Other reported metrics include:
 - Missing-tooth precision: 85.81%
 - Missing-tooth recall: 86.96%
 - Missing-tooth F1: 86.38%
-- Wisdom-tooth exact-case accuracy: 78.00%
 
 Results apply to the evaluated dataset and setup. They should not be interpreted as clinical performance guarantees or assumed to generalize to other populations, scanners, or image acquisition conditions.
 
