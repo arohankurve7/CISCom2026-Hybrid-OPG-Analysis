@@ -14,29 +14,58 @@ The pipeline combines three analysis branches:
 
 The dashboard presents the original OPG, segmentation visualization, numbered tooth positions, tooth-presence summary, wisdom-tooth status, bilateral distribution insights, and radiopacity screening information.
 
-## Architecture
+## Architecture Diagram
 
-```text
-Panoramic OPG
-     |
-     +--> U-Net dental-region segmentation
-     |         |
-     |         +--> Regional structural features
-     |
-     +--> YOLO tooth-instance segmentation
-               |
-               +--> Physical-instance cleanup
-               +--> Upper/lower arch separation
-               +--> Missing-aware FDI assignment
-               +--> Fixed 32-position tooth registry
-                         |
-                         +--> Presence and wisdom-tooth analysis
-                         +--> Bilateral distribution analysis
-                         +--> Registry-based radiopacity analysis
-                                   |
-                                   v
-                            Web dashboard
+```mermaid
+flowchart TD
+    A[Panoramic dental OPG] --> B[Input and preprocessing]
+    B --> C[U-Net dental-region segmentation]
+    B --> D[YOLO tooth-instance segmentation]
+    B --> E[Candidate radiopacity analysis]
+    C --> F[Regional structural analysis]
+    D --> G[Physical tooth-instance cleanup]
+    G --> H[Upper and lower arch separation]
+    H --> I[Missing-aware FDI assignment]
+    I --> J[Fixed 32-position tooth registry]
+    J --> K[Tooth presence and missing-position analysis]
+    J --> L[Wisdom-tooth status]
+    J --> M[Bilateral distribution analysis]
+    E --> N[Candidate radiopacity findings]
+    J --> N
+    F --> O[Integrated visualization]
+    K --> O
+    L --> O
+    M --> O
+    N --> O
+    O --> P[Research web dashboard]
 ```
+
+The branches are complementary: U-Net supports dental-region/structural analysis, while YOLO tooth-instance segmentation supports individual-tooth localization and registry assignment. Radiopacity results are candidate image features, **not confirmed dental diagnoses**.
+
+## Implementation Pipeline
+
+1. **Input:** Load a panoramic dental X-ray (OPG). Image quality and preprocessing can influence subsequent segmentation and numbering.
+2. **Dental-region segmentation:** Use the U-Net component (`segmentation/unet_dental_region.py`) to obtain a dental-region mask for regional analysis.
+3. **Tooth-instance segmentation:** Use the YOLO component (`segmentation/yolo_tooth_instances.py`) to generate tooth-instance candidates.
+4. **Instance resolution:** Clean overlapping or duplicate tooth detections so raw model outputs are not assumed to be distinct physical teeth.
+5. **Anatomical assignment:** Separate upper/lower arches, perform missing-aware FDI assignment (`fdi/fdi_assigner.py`), and populate the 32-position tooth registry (`fdi/tooth_registry.py`).
+6. **Position-based analysis:** Analyze presence/missing positions, wisdom teeth, and bilateral pair states (`fdi/presence_analysis.py` and evaluation modules).
+7. **Radiopacity screening:** Inspect candidate high-radiopacity regions (`anatomy_insights/radiopacity_analysis.py`), without claiming definitive restoration or disease detection.
+8. **Visualization:** Integrate outputs in the research dashboard (`dashboard/app.py`, `dashboard/templates/index.html`).
+
+The orchestration entry point is `pipeline/hybrid_inference.py`. Consult the source for exact runtime configuration and model input/output contracts.
+
+## Module Responsibilities
+
+| Module | Responsibility |
+| --- | --- |
+| `segmentation/` | U-Net dental-region and YOLO tooth-instance inference |
+| `fdi/` | FDI assignment, registry, presence analysis |
+| `anatomy_insights/` | Candidate radiopacity analysis |
+| `pipeline/` | Hybrid inference orchestration |
+| `dashboard/` | Web UI and visualization |
+| `evaluation/` | Segmentation, presence, wisdom-tooth, bilateral, and FDI evaluation |
+
 
 ## Repository Structure
 
